@@ -1,15 +1,12 @@
-const dateRegex = new RegExp('^\\d\\d\\d\\d-\\d\\d-\\d\\d');
+const dateRegex = new RegExp("^\\d\\d\\d\\d-\\d\\d-\\d\\d");
 function jsonDateReviver(key, value) {
   if (dateRegex.test(value)) return new Date(value);
   return value;
 }
 
-
 class IssueFilter extends React.Component {
   render() {
-    return (
-      <div>This is a placeholder for the issue filter.</div>
-    );
+    return <div>This is a placeholder for the issue filter.</div>;
   }
 }
 
@@ -22,30 +19,31 @@ function IssueRow(props) {
       <td>{issue.owner}</td>
       <td>{issue.created.toDateString()}</td>
       <td>{issue.effort}</td>
-      <td>{issue.due ? issue.due.toDateString() : ' '}</td>
+      <td>{issue.due ? issue.due.toDateString() : " "}</td>
       <td>{issue.title}</td>
-    </tr>);
+    </tr>
+  );
 }
 
 function IssueTable(props) {
-  const issueRows = props.issues.map(issue =>
+  const issueRows = props.issues.map((issue) => (
     <IssueRow key={issue.id} issue={issue} />
-  );
+  ));
   return (
     <table className="bordered-table">
-      <thead> <tr>
-        <th>ID</th>
-        <th>Status</th>
-        <th>Owner</th>
-        <th>Created</th>
-        <th>Effort</th>
-        <th>Due Date</th>
-        <th>Title</th>
-      </tr>
+      <thead>
+        {" "}
+        <tr>
+          <th>ID</th>
+          <th>Status</th>
+          <th>Owner</th>
+          <th>Created</th>
+          <th>Effort</th>
+          <th>Due Date</th>
+          <th>Title</th>
+        </tr>
       </thead>
-      <tbody>
-        {issueRows}
-      </tbody>
+      <tbody>{issueRows}</tbody>
     </table>
   );
 }
@@ -58,10 +56,13 @@ class IssueAdd extends React.Component {
     e.preventDefault();
     const form = document.forms.issueAdd;
     const issue = {
-      owner: form.owner.value, title: form.title.value, status: 'New',
-    }
+      owner: form.owner.value,
+      title: form.title.value,
+      due: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 10),
+    };
     this.props.createIssue(issue);
-    form.owner.value = ""; form.title.value = "";
+    form.owner.value = "";
+    form.title.value = "";
   }
   render() {
     return (
@@ -91,21 +92,27 @@ class IssueList extends React.Component {
       }
     }`;
 
-    const response = await fetch('/graphql', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+    const response = await fetch("/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
     });
     const body = await response.text();
     const result = JSON.parse(body, jsonDateReviver);
     this.setState({ issues: result.data.issueList });
   }
-  createIssue(issue) {
-    issue.id = this.state.issues.length + 1;
-    issue.created = new Date();
-    const newIssueList = this.state.issues.slice();
-    newIssueList.push(issue);
-    this.setState({ issues: newIssueList });
+  async createIssue(issue) {
+    const query = `mutation issueAdd($issue: IssueInputs!) {
+        issueAdd(issue: $issue) {
+          id
+        }
+      }`;
+    const response = await fetch("/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, variables: { issue } }),
+    });
+    this.loadData();
   }
   render() {
     return (
@@ -122,4 +129,4 @@ class IssueList extends React.Component {
 }
 
 const element = <IssueList />;
-ReactDOM.render(element, document.getElementById('contents'));
+ReactDOM.render(element, document.getElementById("contents"));

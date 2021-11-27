@@ -26,7 +26,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-var dateRegex = new RegExp('^\\d\\d\\d\\d-\\d\\d-\\d\\d');
+var dateRegex = new RegExp("^\\d\\d\\d\\d-\\d\\d-\\d\\d");
 
 function jsonDateReviver(key, value) {
   if (dateRegex.test(value)) return new Date(value);
@@ -56,7 +56,7 @@ var IssueFilter = /*#__PURE__*/function (_React$Component) {
 
 function IssueRow(props) {
   var issue = props.issue;
-  return /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, issue.id), /*#__PURE__*/React.createElement("td", null, issue.status), /*#__PURE__*/React.createElement("td", null, issue.owner), /*#__PURE__*/React.createElement("td", null, issue.created.toDateString()), /*#__PURE__*/React.createElement("td", null, issue.effort), /*#__PURE__*/React.createElement("td", null, issue.due ? issue.due.toDateString() : ' '), /*#__PURE__*/React.createElement("td", null, issue.title));
+  return /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", null, issue.id), /*#__PURE__*/React.createElement("td", null, issue.status), /*#__PURE__*/React.createElement("td", null, issue.owner), /*#__PURE__*/React.createElement("td", null, issue.created.toDateString()), /*#__PURE__*/React.createElement("td", null, issue.effort), /*#__PURE__*/React.createElement("td", null, issue.due ? issue.due.toDateString() : " "), /*#__PURE__*/React.createElement("td", null, issue.title));
 }
 
 function IssueTable(props) {
@@ -94,7 +94,7 @@ var IssueAdd = /*#__PURE__*/function (_React$Component2) {
       var issue = {
         owner: form.owner.value,
         title: form.title.value,
-        status: 'New'
+        due: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 10)
       };
       this.props.createIssue(issue);
       form.owner.value = "";
@@ -155,10 +155,10 @@ var IssueList = /*#__PURE__*/function (_React$Component3) {
               case 0:
                 query = "query {\n      issueList {\n        id title status owner\n        created effort due\n      }\n    }";
                 _context.next = 3;
-                return fetch('/graphql', {
-                  method: 'POST',
+                return fetch("/graphql", {
+                  method: "POST",
                   headers: {
-                    'Content-Type': 'application/json'
+                    "Content-Type": "application/json"
                   },
                   body: JSON.stringify({
                     query: query
@@ -193,15 +193,46 @@ var IssueList = /*#__PURE__*/function (_React$Component3) {
     }()
   }, {
     key: "createIssue",
-    value: function createIssue(issue) {
-      issue.id = this.state.issues.length + 1;
-      issue.created = new Date();
-      var newIssueList = this.state.issues.slice();
-      newIssueList.push(issue);
-      this.setState({
-        issues: newIssueList
-      });
-    }
+    value: function () {
+      var _createIssue = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(issue) {
+        var query, response;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                query = "mutation issueAdd($issue: IssueInputs!) {\n        issueAdd(issue: $issue) {\n          id\n        }\n      }";
+                _context2.next = 3;
+                return fetch("/graphql", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    query: query,
+                    variables: {
+                      issue: issue
+                    }
+                  })
+                });
+
+              case 3:
+                response = _context2.sent;
+                this.loadData();
+
+              case 5:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function createIssue(_x) {
+        return _createIssue.apply(this, arguments);
+      }
+
+      return createIssue;
+    }()
   }, {
     key: "render",
     value: function render() {
@@ -217,4 +248,4 @@ var IssueList = /*#__PURE__*/function (_React$Component3) {
 }(React.Component);
 
 var element = /*#__PURE__*/React.createElement(IssueList, null);
-ReactDOM.render(element, document.getElementById('contents'));
+ReactDOM.render(element, document.getElementById("contents"));
