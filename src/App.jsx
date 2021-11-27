@@ -1,15 +1,15 @@
-const dateRegex = new RegExp("^\\d\\d\\d\\d-\\d\\d-\\d\\d");
+const dateRegex = new RegExp('^\\d\\d\\d\\d-\\d\\d-\\d\\d');
 function jsonDateReviver(key, value) {
   if (dateRegex.test(value)) return new Date(value);
   return value;
 }
-
 class IssueFilter extends React.Component {
   render() {
-    return <div>This is a placeholder for the issue filter.</div>;
+    return (
+      <div>This is a placeholder for the issue filter.</div>
+    );
   }
 }
-
 function IssueRow(props) {
   const issue = props.issue;
   return (
@@ -19,20 +19,18 @@ function IssueRow(props) {
       <td>{issue.owner}</td>
       <td>{issue.created.toDateString()}</td>
       <td>{issue.effort}</td>
-      <td>{issue.due ? issue.due.toDateString() : " "}</td>
+      <td>{issue.due ? issue.due.toDateString() : ''}</td>
       <td>{issue.title}</td>
     </tr>
   );
 }
-
 function IssueTable(props) {
-  const issueRows = props.issues.map((issue) => (
+  const issueRows = props.issues.map(issue =>
     <IssueRow key={issue.id} issue={issue} />
-  ));
+  );
   return (
     <table className="bordered-table">
       <thead>
-        {" "}
         <tr>
           <th>ID</th>
           <th>Status</th>
@@ -43,7 +41,9 @@ function IssueTable(props) {
           <th>Title</th>
         </tr>
       </thead>
-      <tbody>{issueRows}</tbody>
+      <tbody>
+        {issueRows}
+      </tbody>
     </table>
   );
 }
@@ -56,13 +56,11 @@ class IssueAdd extends React.Component {
     e.preventDefault();
     const form = document.forms.issueAdd;
     const issue = {
-      owner: form.owner.value,
-      title: form.title.value,
-      due: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 10),
-    };
+      owner: form.owner.value, title: form.title.value,
+      due: new Date(new Date().getTime() + 1000*60*60*24*10),
+    }
     this.props.createIssue(issue);
-    form.owner.value = "";
-    form.title.value = "";
+    form.owner.value = ""; form.title.value = "";
   }
   render() {
     return (
@@ -72,6 +70,31 @@ class IssueAdd extends React.Component {
         <button>Add</button>
       </form>
     );
+  }
+}
+
+async function graphQLFetch(query, variables = {}) {
+  try {
+    const response = await fetch('/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json'},
+      body: JSON.stringify({ query, variables })
+    });
+    const body = await response.text();
+    const result = JSON.parse(body, jsonDateReviver);
+
+    if (result.errors) {
+      const error = result.errors[0];
+      if (error.extensions.code == 'BAD_USER_INPUT') {
+        const details = error.extensions.exception.errors.join('\n ');
+        alert(`${error.message}:\n ${details}`);
+      } else {
+        alert(`${error.extensions.code}: ${error.message}`);
+      }
+    }
+    return result.data;
+  } catch (e) {
+    alert(`Error in sending data to server: ${e.message}`);
   }
 }
 
@@ -92,28 +115,25 @@ class IssueList extends React.Component {
       }
     }`;
 
-    const response = await fetch("/graphql", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query }),
-    });
-    const body = await response.text();
-    const result = JSON.parse(body, jsonDateReviver);
-    this.setState({ issues: result.data.issueList });
+    const data = await graphQLFetch(query);
+    if (data) {
+      this.setState({ issues: data.issueList });
+    }
   }
+
   async createIssue(issue) {
     const query = `mutation issueAdd($issue: IssueInputs!) {
-        issueAdd(issue: $issue) {
-          id
-        }
-      }`;
-    const response = await fetch("/graphql", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, variables: { issue } }),
-    });
-    this.loadData();
+      issueAdd(issue: $issue) {
+        id
+      }
+    }`;
+
+    const data = await graphQLFetch(query, { issue });
+    if (data) {
+      this.loadData();
+    }
   }
+
   render() {
     return (
       <React.Fragment>
@@ -127,6 +147,5 @@ class IssueList extends React.Component {
     );
   }
 }
-
 const element = <IssueList />;
-ReactDOM.render(element, document.getElementById("contents"));
+ReactDOM.render(element, document.getElementById('contents'));
