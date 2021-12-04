@@ -1,8 +1,10 @@
 const dateRegex = new RegExp('^\\d\\d\\d\\d-\\d\\d-\\d\\d');
+
 function jsonDateReviver(key, value) {
   if (dateRegex.test(value)) return new Date(value);
   return value;
 }
+
 class IssueFilter extends React.Component {
   render() {
     return (
@@ -10,6 +12,7 @@ class IssueFilter extends React.Component {
     );
   }
 }
+
 function IssueRow(props) {
   const issue = props.issue;
   return (
@@ -24,10 +27,12 @@ function IssueRow(props) {
     </tr>
   );
 }
+
 function IssueTable(props) {
   const issueRows = props.issues.map(issue =>
     <IssueRow key={issue.id} issue={issue} />
   );
+
   return (
     <table className="bordered-table">
       <thead>
@@ -47,11 +52,13 @@ function IssueTable(props) {
     </table>
   );
 }
+
 class IssueAdd extends React.Component {
   constructor() {
     super();
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+
   handleSubmit(e) {
     e.preventDefault();
     const form = document.forms.issueAdd;
@@ -62,6 +69,7 @@ class IssueAdd extends React.Component {
     this.props.createIssue(issue);
     form.owner.value = ""; form.title.value = "";
   }
+
   render() {
     return (
       <form name="issueAdd" onSubmit={this.handleSubmit}>
@@ -104,9 +112,11 @@ class IssueList extends React.Component {
     this.state = { issues: [] };
     this.createIssue = this.createIssue.bind(this);
   }
+
   componentDidMount() {
     this.loadData();
   }
+
   async loadData() {
     const query = `query {
       issueList {
@@ -147,5 +157,7 @@ class IssueList extends React.Component {
     );
   }
 }
+
 const element = <IssueList />;
+
 ReactDOM.render(element, document.getElementById('contents'));
