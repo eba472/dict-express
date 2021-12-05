@@ -4,8 +4,11 @@ const { ApolloServer, UserInputError } = require('apollo-server-express');
 const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql/language');
 const { MongoClient } = require('mongodb');
+require('dotenv').config();
 
-const url = 'mongodb+srv://eba472:Home472%23@cluster0.2tyxl.mongodb.net/task_manager?retryWrites=true&w=majority'
+const url = process.env.DB_URL || 'mongodb://localhost/issuetracker';
+const port = process.env.API_SERVER_PORT || 3000;
+
 let db;
 
 let aboutMessage = "Issue Tracker API v1.0";
@@ -105,8 +108,8 @@ server.applyMiddleware({ app, path: '/graphql' });
 (async function () {
   try {
     await connectToDb();
-    app.listen(3000, function () {
-      console.log('API server started on port 3000');
+    app.listen(port, function () {
+      console.log(`API server started on port ${port}`);
     });
     console.log("hehe")
   } catch (err) {
