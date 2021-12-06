@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "start": "nodemon -w uiserver.js -w .env uiserver.js",
+        "lint": "eslint . --ext js,jsx --ignore-pattern public",
         "compile": "babel src --out-dir public",
         "watch": "babel src --out-dir public --watch --verbose"
     },
@@ -17,6 +18,11 @@
         "@babel/cli": "^7.2.3",
         "@babel/core": "^7.2.2",
         "@babel/preset-env": "^7.2.3",
-        "@babel/preset-react": "^7.0.0"
+        "@babel/preset-react": "^7.0.0",
+        "eslint": "^8.4.0",
+        "eslint-config-airbnb": "^19.0.2",
+        "eslint-plugin-import": "^2.25.3",
+        "eslint-plugin-jsx-a11y": "^6.5.1",
+        "eslint-plugin-react": "^7.27.1"
     }
 }
