@@ -1,10 +1,9 @@
 {
-  "extends": "airbnb",
+  "extends": "airbnb-base",
   "env": {
-    "browser": true
+    "node": true
   },
   "rules": {
-    "react/prop-types": "off",
-    "max-classes-per-file": ["warn", 10]
+    "no-console": "off"
   }
 }
