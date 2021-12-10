@@ -4,6 +4,7 @@
       "browser": true
     },
     "rules": {
+      "import/extensions": [ "error", "always", { "ignorePackages": true } ],
       "react/prop-types": "off",
       "max-classes-per-file": ["warn", 10]
     }

@@ -1,4 +1,5 @@
 node_modules
 package-lock.json
-ui/public/App.js
+ui/public/bundle/*.js
+ui/public/*js
 .env
